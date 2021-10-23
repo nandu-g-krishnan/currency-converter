@@ -1,0 +1,205 @@
+<!-- <div class="dropdown">
+    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      Select Currency
+    </button>
+    <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+      <button class="dropdown-item" (click)="test(symbol)" type="button" *ngFor="let symbol of currencyList;" >{{symbol.code}}</button>
+    </div>
+</div> -->
+
+<!-- <div class="container">
+  <div class="card">
+    <div class="card-header">
+      Upload csv to convert
+    </div>
+    <div class="card-body">
+      <input type="file" #csvReader name="Upload CSV" id="txtFileUpload" (change)="uploadListener($event)" accept=".csv" />
+      <p>The Uploaded Currency is :</p>
+    </div>
+  </div>
+<a href="javascript:;" *ngIf="records.length > 0" (click)="getJsonData()" class="btn btn-primary">Convert Json </a>
+<a href="javascript:;" *ngIf="records.length > 0" (click)="fileReset()" class="btn btn-primary">Reset </a>
+<div class="dropdown">
+  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+    Select Currency
+  </button>
+  <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+    <button class="dropdown-item" (click)="selectCurrency(symbol)" title="{{symbol.description}}" type="button" *ngFor="let symbol of currencyList;" >{{symbol.code}}</button>
+  </div>
+</div>
+</div>
+<button type="button" class="btn btn-outline-primary" (click)="convert()">Convert</button> -->
+
+<!-- 
+<div class="container-fluid bg-1 text-center">
+  <div class="container ">
+    <h3 class="margin">Upload csv to convert</h3>
+    <div class="card border-info mb-3">
+      <div class="card-header">
+        <p style="color: #6c757d!important;">Upload csv to convert</p>
+      </div>
+      <div class="card-body">
+        <input style="color: #6c757d!important;" type="file" #csvReader name="Upload CSV" id="txtFileUpload"
+          (change)="uploadListener($event)" accept=".csv" />
+      </div>
+      <div class="card-footer text-muted">
+        <p>The Uploaded Currency is :</p>
+      </div>
+    </div>
+  </div>
+</div> -->
+
+<div class="container-fluid bg-1 text-center">
+  <div class="jumbotron">
+    <div class="container">
+      <h1 class=" margin display-4">Hello, User!</h1>
+      <p class="lead margin">Upload the CSV file to convert the amount to desired currency</p>
+
+      <p class="lead margin">
+        <input style="color: #6c757d!important;" type="file" #csvReader name="Upload CSV" id="txtFileUpload"
+          (change)="uploadListener($event)" accept=".csv" />
+          
+      </p>
+      <!-- <p>The Uploaded Currency is : {{}}</p> -->
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid d-flex flex-column bg-2 text-center">
+  <h3 class="margin">Actions</h3><br>
+  <div class="row">
+    <div class="col-sm-4">
+
+      <div class="card text-center">
+        <div class="card-header ">
+          <p>Select the dropdown to convert !</p>
+        </div>
+        <div class="card-body">
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2" data-bs-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              {{selectedValue}}
+            </button>
+            <div class="dropdown-menu" aria-labelledby="dropdownMenu2">
+              <button class="dropdown-item" (click)="selectCurrency(symbol)" title="{{symbol.description}}"
+                type="button" *ngFor="let symbol of currencyList;" value="{{symbol.code}}">{{symbol.code}}</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer ">
+          Amount in CSV will be Converted to
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card text-center">
+        <div class="card-header ">
+          <p>Convert</p>
+        </div>
+        <div class="card-body">
+          <button type="button" class="btn btn-primary" (click)="convert()">Convert</button>
+         
+        </div>
+        <div class="card-footer ">
+          Clicking the convert will convert the amount from to
+        </div>
+      </div>
+    </div>
+    <div class="col-sm-4">
+      <div class="card text-center">
+        <div class="card-header ">
+          <p>Reset</p>
+        </div>
+        <div class="card-body">
+          <button type="button"  class="btn btn-danger" [disabled]="!(rows.length > 0)"  (click)="fileReset()">Reset</button>
+        </div>
+        <div class="card-footer ">
+          Clicking the reset button will reset the file and table
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid bg-3 text-center">
+
+  <div class="container margin" >
+    <ngx-datatable #myTable class="material fullscreen" [rows]="records" [loadingIndicator]="loadingIndicator"
+      [columns]="columns" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="50" rowHeight="auto"
+      [limit]="10" [messages]="messageTable" 
+      [reorderable]="reorderable" >
+
+      <ngx-datatable-column name="Name" prop="Name" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.name}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column name="Currency" prop="currency" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.currency}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column name="Amount" prop="amount" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.amount}}
+        </ng-template>
+      </ngx-datatable-column>
+     
+      <ngx-datatable-column name="TransactionDate" prop="transactionDate" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.transactionDate}}
+        </ng-template>
+      </ngx-datatable-column>
+
+      
+    </ngx-datatable>
+  </div>
+
+  <div class="container" *ngIf="rows.length > 0">
+    <ngx-datatable #myTable class="material fullscreen" [rows]="rows" [loadingIndicator]="loadingIndicator1"
+      [columns]="columns" [columnMode]="ColumnMode.force" [headerHeight]="50" [footerHeight]="50" rowHeight="auto"
+      [limit]="10"
+      [reorderable]="reorderable" >
+
+      <ngx-datatable-column name="Name" prop="Name" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.name}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column name="Currency" prop="currency" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.currency}}
+        </ng-template>
+      </ngx-datatable-column>
+      <ngx-datatable-column name="Amount" prop="amount" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.amount}}
+        </ng-template>
+      </ngx-datatable-column>
+     
+      <ngx-datatable-column name="Transaction Date" prop="transactionDate" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.transactionDate}}
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Converted Currency" prop="convertedCurrency" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.convertedCurrency}}
+        </ng-template>
+      </ngx-datatable-column>
+
+      <ngx-datatable-column name="Converted Amount" prop="convertedAmount" [width]="80">
+        <ng-template let-value="value" let-row="row"  ngx-datatable-cell-template>
+         {{row.convertedAmount}}
+        </ng-template>
+      </ngx-datatable-column>
+
+      
+    </ngx-datatable>
+  </div>
+</div>
+
+<footer class="container-fluid bg-4 text-center">
+  <p>Copyright © Converter {{name}} 2021</p>
+</footer>
