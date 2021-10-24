@@ -20,11 +20,9 @@ export class CurrencyService {
 
   getCurrenctCurrencyValue(code: any) {
     return this.http.get(this.currency+'?base='+code);
-    //.map(response => response.json().items);;
   }
 
   getCurrenctTimeSeries(fromDate: any, toDate:any, code: any) {
     return this.http.get(`${this.timeSeries}${fromDate}&end_date=${toDate}`+'&base='+code);
-    //.map(response => response.json().items);;
   }
 }

@@ -101,7 +101,8 @@ export class ConverterComponent implements OnInit {
   }
   
   uploadListener($event: any): void {
-    this.dataReset();
+    try {    
+      this.dataReset();
     this.loadingIndicator = true;
     let text = [];
     let files = $event.srcElement.files;
@@ -119,12 +120,20 @@ export class ConverterComponent implements OnInit {
       reader.onload = () => {
         let csvData: string = reader.result.toString();
         let csvRecordsArray = (csvData).split(/\r\n|\n/);
-
+        let formattedResults
         let headersRow = this.getHeaderArray(csvRecordsArray);
         let recordData = this.getDataRecordsArrayFromCSVFile(csvRecordsArray, headersRow.length);
-        let formattedResults =  _.forEach(recordData, function(value) {
-          value.transactionDate  = this.datepipe.transform(value['transactionDate'], 'yyyy-MM-dd')
-        }.bind(this));
+        try {    
+           formattedResults =  _.forEach(recordData, function(value) {
+            value.transactionDate  = this.datepipe.transform(value['transactionDate'], 'yyyy-MM-dd')
+          }.bind(this));
+        }
+        catch (error) {
+          alert(`Data error in file ${error}`);
+          this.fileReset();
+          return
+        }
+        
         let results  = _.sortBy(formattedResults, ['transactionDate']);
         this.records = results;
         let temp = [...results];
@@ -150,6 +159,12 @@ export class ConverterComponent implements OnInit {
       this.fileReset();
     }
     this.loadingIndicator = false
+    }
+    catch (error) {
+      alert(error);
+      this.fileReset();
+    }
+    
   }
 
   getDatesList(rows: any) {
