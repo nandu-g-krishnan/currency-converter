@@ -6,3 +6,4 @@
 [1022/023441.043:ERROR:file_io.cc(134)] WriteFile: The pipe is being closed. (0xE8)
 [1022/234246.477:ERROR:appcenter_api.cc(52)] expecting appcenter url prefix
 [1023/160842.309:ERROR:appcenter_api.cc(52)] expecting appcenter url prefix
+[1024/125037.056:ERROR:appcenter_api.cc(52)] expecting appcenter url prefix

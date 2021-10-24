@@ -8,13 +8,22 @@ import { CurrencyService } from 'src/shared/currency.service';
 import { ConverterComponent } from './converter/converter.component';
 import { HttpClientModule } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
+import { AngularFireModule } from "@angular/fire";
+import { AngularFireAuthModule } from "@angular/fire/auth";
+import { AngularFirestoreModule } from '@angular/fire/firestore';
+import { environment } from 'src/environments/environment';
+import { SignInComponent } from './sign-in/sign-in.component';
+import { SignUpComponent } from './sign-up/sign-up.component';
+import { AuthService } from 'src/shared/auth.service';
 
 
 
 @NgModule({
   declarations: [
     AppComponent,
-    ConverterComponent
+    ConverterComponent,
+    SignInComponent,
+    SignUpComponent
   ],
   imports: [
     BrowserModule,
@@ -26,9 +35,12 @@ import { DatePipe } from '@angular/common';
       selectedMessage: 'selected'
       }
       }),
-    HttpClientModule
+    HttpClientModule,
+    AngularFireModule.initializeApp(environment.firebaseConfig),
+    AngularFireAuthModule,
+    AngularFirestoreModule,
   ],
-  providers: [CurrencyService,DatePipe],
+  providers: [CurrencyService,DatePipe,AuthService],
   bootstrap: [AppComponent]
  
 })

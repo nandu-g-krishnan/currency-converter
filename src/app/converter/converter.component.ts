@@ -4,6 +4,7 @@ import { ColumnMode, DatatableComponent } from '@swimlane/ngx-datatable';
 
 import 'lodash';
 import { DatePipe } from '@angular/common';
+import { AuthService } from 'src/shared/auth.service';
 
 declare var _:any;
 export class CsvData {
@@ -23,62 +24,14 @@ export class CsvData {
 })
 export class ConverterComponent implements OnInit {
 
-  constructor(private currency: CurrencyService,public datepipe: DatePipe) { }
+  constructor(private currency: CurrencyService,public datepipe: DatePipe, public authService: AuthService) { }
+  columns = [{ prop: 'Name' }, { name: 'Currency' }, { name: 'Amount' }, { name: 'TransactionDate' }];
+  @ViewChild('csvReader',{static: true}) csvReader: any;
+  @ViewChild('firstTable', {static: true}) myTable: DatatableComponent;
+  jsondatadisplay:any;
   symbol: Symbol;
   currencyList: any[] = [];
   selectedValue = 'Select';
-
-  ngOnInit() {
-    this.currency.getConfig().subscribe(data => {
-      //  console.log(data['symbols']);
-      //  console.log(JSON.stringify(data));
-      let temp = data['symbols'];
-      for (let key of Object.keys(temp)) {
-        let tempValue = temp[key];
-        // console.log(tempValue);
-        let currencyObj = {
-          description: tempValue.description,
-          code: tempValue.code
-        }
-        this.currencyList.push(currencyObj);
-      }
-    });
-  }
-
-  selectCurrency(event: any) {
-    this.currencyTo = event.code;
-    this.selectedValue = this.currencyTo
-    console.log(this.currencyTo);
-  }
-  public messageTable = {
-    emptyMessage: 'No data to display',
-    totalMessage: 'total',
-    selectedMessage: 'selected'
-  }
-  convert() {
-    this.loadingIndicator1 = true;
-    this.currency.getCurrenctTimeSeries(this.fromDate,this.toDate,this.currencyValue).subscribe(data => {
-      this.timeSeries = data['rates'];
-      this.convertTableData(this.timeSeries,this.datesList);
-    });
-    this.loadingIndicator1 = false
-  }
-  
-  convertTableData(timeSeries: any, datesList: any) {
-    
-    let currencyFiltered: any[] = [];
-    let c=this.currencyTo
-    currencyFiltered = _.pick(timeSeries, datesList);
-    this.rows = _.forEach(this.records, function(value) {
-      let date = value['transactionDate'];
-      let v = _.pick(currencyFiltered, date);
-      console.log(v[value['transactionDate']]['ANG']);
-      value.convertedAmount = c != value.currency ? v[date][c] * value.convertedEURAmount : value.amount;
-      value.convertedCurrency = c;
-      // console.log(value);
-    });
-    console.log(this.rows);
-  }
   name = 'Angular ' + VERSION.major;
   public records: any[] = [];
   rows : any[] = [];
@@ -95,21 +48,68 @@ export class ConverterComponent implements OnInit {
   toDate: any;
   timeSeries: any;
   datesList: any[] = [];
+
+  ngOnInit() {
+    this.currency.getConfig().subscribe(data => {
+      let temp = data['symbols'];
+      for (let key of Object.keys(temp)) {
+        let tempValue = temp[key];
+        let currencyObj = {
+          description: tempValue.description,
+          code: tempValue.code
+        }
+        this.currencyList.push(currencyObj);
+      }
+    }, error => {
+      alert(error);
+    });
+  }
+
+  selectCurrency(event: any) {
+    this.currencyTo = event.code;
+    this.selectedValue = this.currencyTo;
+  }
+  public messageTable = {
+    emptyMessage: 'No data to display',
+    totalMessage: 'total',
+    selectedMessage: 'selected'
+  }
+  convert() {
+    this.loadingIndicator1 = true;
+    this.currency.getCurrenctTimeSeries(this.fromDate,this.toDate,this.currencyValue).subscribe(data => {
+      this.timeSeries = data['rates'];
+      this.convertTableData(this.timeSeries,this.datesList);
+    }, error => {
+      alert(error);
+      this.loadingIndicator1 = false
+    });
+    this.loadingIndicator1 = false
+  }
   
-
-
-
-  columns = [{ prop: 'Name' }, { name: 'Currency' }, { name: 'Amount' }, { name: 'TransactionDate' }];
-  @ViewChild('csvReader',{static: true}) csvReader: any;
-  @ViewChild('firstTable', {static: true}) myTable: DatatableComponent;
-  jsondatadisplay:any;
-
+  convertTableData(timeSeries: any, datesList: any) {
+    
+    let currencyFiltered: any[] = [];
+    let c=this.currencyTo
+    currencyFiltered = _.pick(timeSeries, datesList);
+    this.rows = _.forEach(this.records, function(value) {
+      let date = value['transactionDate'];
+      let v = _.pick(currencyFiltered, date);
+      console.log(v[value['transactionDate']]['ANG']);
+      value.convertedAmount = c != value.currency ? v[date][c] * value.convertedEURAmount : value.amount;
+      value.convertedCurrency = c;
+    });
+  }
+  
   uploadListener($event: any): void {
     this.dataReset();
     this.loadingIndicator = true;
     let text = [];
     let files = $event.srcElement.files;
-
+    if(files.length == 0) {
+      this.fileReset();
+      this.loadingIndicator = false;
+      return
+    }
     if (this.isValidCSVFile(files[0])) {
 
       let input = $event.target;
@@ -121,12 +121,7 @@ export class ConverterComponent implements OnInit {
         let csvRecordsArray = (csvData).split(/\r\n|\n/);
 
         let headersRow = this.getHeaderArray(csvRecordsArray);
-        console.log(headersRow);
-        //this.columns = headersRow.slice( 0, 3);
         let recordData = this.getDataRecordsArrayFromCSVFile(csvRecordsArray, headersRow.length);
-        // this.records.forEach(rowData => {
-        //   this.rows.push(rowData);
-        // });
         let formattedResults =  _.forEach(recordData, function(value) {
           value.transactionDate  = this.datepipe.transform(value['transactionDate'], 'yyyy-MM-dd')
         }.bind(this));
@@ -134,14 +129,12 @@ export class ConverterComponent implements OnInit {
         this.records = results;
         let temp = [...results];
         let init = _.head(temp);
-        //this.currencyValue = (init.currency);
         let toDate = temp[temp.length-1]['transactionDate'];
         this.toDate = this.datepipe.transform(toDate, 'yyyy-MM-dd');
         let fromDate = temp[0]['transactionDate'];
         this.fromDate = this.datepipe.transform(fromDate, 'yyyy-MM-dd');
         console.log(this.toDate,this.fromDate)
         console.log(this.currencyValue);
-        // this.getCurrenctCurrencyValue(this.currencyValue);
         this.getDatesList(temp);
         this.convertToEuro();
         
@@ -159,16 +152,6 @@ export class ConverterComponent implements OnInit {
     this.loadingIndicator = false
   }
 
-  // getResultsInFormat() {
-  //   this.rows = _.sortBy(this.records, ['transactionDate']);
-  //   let  vg = _.forEach(rows, function(value) {
-  //     let d = value['transactionDate'];
-  //     value.transactionDate  = this.datepipe.transform(value['transactionDate'], 'yyyy-MM-dd')
-      
-  //   }.bind(this));
-  // }
-
-
   getDatesList(rows: any) {
     let list: any[] = [];
     let  vg = _.forEach(rows, function(value) {
@@ -180,23 +163,6 @@ export class ConverterComponent implements OnInit {
     
   }
 
-
-  // getCurrenctCurrencyValue(CurrenctCurrencyValue) {
-  //   this.currency.getCurrenctCurrencyValue(CurrenctCurrencyValue).subscribe(data => {
-  //     this.EURValue = data['rates']['EUR'];
-  //     console.log(this.EURValue);
-  //     this.convertToEuro();
-  //   });
-    
-  // }
-
-  // convertToEuro() {
-  //   let eur = this.EURValue;
-  //   let  vg = _.forEach(this.records, function(value) {
-  //     value.convertedEURAmount = value.amount * eur;
-  //   });
-  //   console.log(vg);
-  // }
 
   convertToEuro() {
     let records :any[];
@@ -213,8 +179,9 @@ export class ConverterComponent implements OnInit {
         c = value['currency']
         value.convertedEURAmount =  value.amount * (1/(v[date][c]));
         value.convertedCurrency = c;
-        console.log(value);
       });
+    }, error => {
+      alert(error);
     });
     return records;
   }
@@ -243,6 +210,7 @@ export class ConverterComponent implements OnInit {
     return file.name.endsWith(".csv");
   }
 
+  // Get Headers from CSV
   getHeaderArray(csvRecordsArr: any) {
     let headers = (csvRecordsArr[0]).split(',');
     let headerArray = [];
@@ -265,10 +233,7 @@ export class ConverterComponent implements OnInit {
     this.records = [];
     this.rows = [];
     this.selectedValue = 'Select';
+    this.currencyTo = null;
   }
 
-  getJsonData(){
-    this.jsondatadisplay = JSON.stringify(this.records);
-    
-  }
 }
