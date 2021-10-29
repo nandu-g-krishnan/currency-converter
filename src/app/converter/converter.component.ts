@@ -176,7 +176,15 @@ export class ConverterComponent implements OnInit {
     this.datesList = list;
     
   }
+   getNumberOfDays(start, end) {
+    const date1 = new Date(start);
+    const date2 = new Date(end);
+    const oneDay = 1000 * 60 * 60 * 24;
+    const diffInTime = date2.getTime() - date1.getTime();
+    const diffInDays = Math.round(diffInTime / oneDay);
 
+    return diffInDays;
+}
 
   convertToEuro() {
     let records :any[];
@@ -187,6 +195,14 @@ export class ConverterComponent implements OnInit {
       this.currencyValue = data['base'];
       let datesList = this.datesList;
       currencyFiltered = _.pick(timeSeries, datesList);
+      
+      let dateCount = this.getNumberOfDays(this.fromDate, this.toDate);
+      if(dateCount > 366)
+      {
+        alert("From date and To date exceeds limit.");
+        this.fileReset();
+        return
+      }
         this.records = _.forEach(this.records, function(value) {
         let date = value['transactionDate'];
         let v = _.pick(currencyFiltered, date);
