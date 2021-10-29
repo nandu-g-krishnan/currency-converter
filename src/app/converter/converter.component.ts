@@ -94,7 +94,6 @@ export class ConverterComponent implements OnInit {
     this.rows = _.forEach(this.records, function(value) {
       let date = value['transactionDate'];
       let v = _.pick(currencyFiltered, date);
-      console.log(v[value['transactionDate']]['ANG']);
       value.convertedAmount = c != value.currency ? v[date][c] * value.convertedEURAmount : value.amount;
       value.convertedCurrency = c;
     });
